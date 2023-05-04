@@ -1,156 +1,70 @@
-<?php include 'template/header.php' ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REGISTRO</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container my-5">
+        <h2>Lista de Registros</h2>
+        <a class="btn btn-primary" href="/expo/create.php" role="button">Nuevo Registro</a>
+        <br>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Celular</th>
+                    <th>Direccion</th>
+                    <th>Fecha</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                $server = "localhost";
+                $username = "root";
+                $password = "";
+                $database = "exposicion";
 
-<?php
-    include_once "model/conexion.php";
-    $sentencia = $bd -> query("select * from persona");
-    $persona = $sentencia->fetchAll(PDO::FETCH_OBJ);
-    //print_r($persona);
-?>
+                $connection = new mysqli($server, $username, $password, $database);
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <!-- inicio alerta -->
-            <?php 
-                if(isset($_GET['mensaje']) and $_GET['mensaje'] == 'falta'){
-            ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>Error!</strong> Rellena todos los campos.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <?php 
+                if ($connection->connect_error){
+                    die("Conexion fallida: " . $connection->connect_error);
                 }
-            ?>
 
+                $sql="SELECT * FROM exposicion";
+                $result=$connection->query($sql);
 
-            <?php 
-                if(isset($_GET['mensaje']) and $_GET['mensaje'] == 'registrado'){
-            ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>Registrado!</strong> Se agregaron los datos.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <?php 
+                if (!$result) {
+                    die("Invalido: " . $connection->error);
                 }
-            ?>   
-            
-            
 
-            <?php 
-                if(isset($_GET['mensaje']) and $_GET['mensaje'] == 'error'){
-            ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>Error!</strong> Vuelve a intentar.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <?php 
+                while($row=$result->fetch_assoc()){
+                    echo "
+                    <tr>
+                        <td>$row[id]</td>
+                        <td>$row[nombre]</td>
+                        <td>$row[email]</td>
+                        <td>$row[celular]</td>
+                        <td>$row[direccion]</td>
+                        <td>$row[fecha]</td>
+                        <td>
+                            <a class='btn btn-primary btn-sm' href='/expo/edit.php?id=$row[id]'>Editar</a>
+                            <a class='btn btn-danger btn-sm' href='/expo/delete.php?id=$row[id]'>Eliminar</a>
+                        </td>
+                    </tr>
+                    ";
                 }
-            ?>   
 
-
-
-            <?php 
-                if(isset($_GET['mensaje']) and $_GET['mensaje'] == 'editado'){
-            ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>Cambiado!</strong> Los datos fueron actualizados.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <?php 
-                }
-            ?> 
-
-
-            <?php 
-                if(isset($_GET['mensaje']) and $_GET['mensaje'] == 'eliminado'){
-            ?>
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <strong>Eliminado!</strong> Los datos fueron borrados.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <?php 
-                }
-            ?> 
-
-            <!-- fin alerta -->
-            <div class="card">
-                <div class="card-header">
-                    Lista de personas
-                </div>
-                <div class="p-4">
-                    <table class="table align-middle">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Nombres</th>
-                                <th scope="col">Apellido Paterno</th>
-                                <th scope="col">Apellido Materno</th>
-                                <th scope="col">F.Nacimiento</th>
-                                <th scope="col">Celular</th>
-                                <th scope="col" colspan="2">Opciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            
-                            <?php 
-                                foreach($persona as $dato){ 
-                            ?>
-
-                            <tr>
-                                <td scope="row"><?php echo $dato->id; ?></td>
-                                <td><?php echo $dato->nombres; ?></td>
-                                <td><?php echo $dato->apellido_paterno; ?></td>
-                                <td><?php echo $dato->apellido_materno; ?></td>
-                                <td><?php echo $dato->fecha_nacimiento; ?></td>
-                                <td><?php echo $dato->celular; ?></td>
-                                <td><a class="text-success" href="editar.php?codigo=<?php echo $dato->id; ?>"><i class="bi bi-pencil-square"></i></a></td>
-                                <td><a onclick="return confirm('Estas seguro de eliminar?');" class="text-danger" href="eliminar.php?codigo=<?php echo $dato->id; ?>"><i class="bi bi-trash"></i></a></td>
-                            </tr>
-
-                            <?php 
-                                }
-                            ?>
-
-                        </tbody>
-                    </table>
-                    
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    Ingresar datos:
-                </div>
-                <form class="p-4" method="POST" action="registrar.php">
-                    <div class="mb-3">
-                        <label class="form-label">Nombres: </label>
-                        <input type="text" class="form-control" name="txtNombres" autofocus required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Apellido Paterno: </label>
-                        <input type="text" class="form-control" name="txtApPaterno" autofocus required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Apellido Materno: </label>
-                        <input type="text"" class="form-control" name="txtApMaterno" autofocus required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Fecha de Nacimiento: </label>
-                        <input type="date" class="form-control" name="txtFechaNacimiento" autofocus required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Celular: </label>
-                        <input type="number" class="form-control" name="txtCelular" autofocus required>
-                    </div>
-                    <div class="d-grid">
-                        <input type="hidden" name="oculto" value="1">
-                        <input type="submit" class="btn btn-primary" value="Registrar">
-                    </div>
-                </form>
-            </div>
-        </div>
+                ?>
+                
+            </tbody>
+        </table>
     </div>
-</div>
-
-<?php include 'template/footer.php' ?>
+</body>
+</html>
